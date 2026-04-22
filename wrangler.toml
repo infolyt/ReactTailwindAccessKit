@@ -10,7 +10,7 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "onereport-db"
-database_id = "your-d1-database-id-here"
+database_id = "99babbda-521c-4a37-8439-b07d16bde170"
 
 [observability]
 enabled = true
