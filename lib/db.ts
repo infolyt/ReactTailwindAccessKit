@@ -1,14 +1,27 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 
-// Database file path
-const DB_PATH = path.join(process.cwd(), 'data', 'onereport.db');
+let dbInstance: Database.Database | null = null;
 
-// Create database connection
-const db = new Database(DB_PATH);
+function getDb(): Database.Database {
+  if (dbInstance) return dbInstance;
 
-// Enable WAL mode for better performance
-db.pragma('journal_mode = WAL');
+  const DB_DIR = path.join(process.cwd(), 'data');
+  const DB_PATH = path.join(DB_DIR, 'onereport.db');
+
+  if (!fs.existsSync(DB_DIR)) {
+    fs.mkdirSync(DB_DIR, { recursive: true });
+  }
+
+  dbInstance = new Database(DB_PATH);
+
+  dbInstance.pragma('journal_mode = WAL');
+
+  return dbInstance;
+}
+
+const db = getDb();
 
 // Create users table
 db.exec(`
