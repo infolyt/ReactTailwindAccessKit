@@ -44,7 +44,7 @@ npm run db:create-admin # Create admin user
 ## Authentication
 
 - JWT-based authentication
-- Default admin: admin@example.com / admin123
+- Default admin: admin@example.com / k3@MnpR1
 - Create new admin: `npm run db:create-admin`
 
 ## Testing

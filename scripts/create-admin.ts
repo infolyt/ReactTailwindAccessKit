@@ -19,7 +19,7 @@ interface Args {
 function parseArgs(): Args {
   const args: Args = {};
   const argv = process.argv.slice(2);
-  
+
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--email' || arg === '-e') {
@@ -33,7 +33,7 @@ function parseArgs(): Args {
       process.exit(0);
     }
   }
-  
+
   return args;
 }
 
@@ -45,7 +45,7 @@ Usage: npm run db:create-admin -- [options]
 
 Options:
   -e, --email <email>    Admin email (default: admin@example.com)
-  -p, --password <pass> Admin password (default: admin123)
+  -p, --password <pass> Admin password (default: k3@MnpR1)
   -n, --name <name>     Admin name (default: Admin)
   -h, --help            Show this help message
 
@@ -57,20 +57,20 @@ Example:
 function main() {
   const args = parseArgs();
   const email = args.email || 'admin@example.com';
-  const password = args.password || 'admin123';
+  const password = args.password || 'k3@MnpR1';
   const name = args.name || 'Admin';
-  
+
   console.log('\n🔧 OneReport CLI - Creating Admin User\n');
   console.log(`Email: ${email}`);
   console.log(`Name: ${name}`);
-  
+
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
-    
+
     const db = new Database(DB_PATH);
-    
+
     // Initialize database schema if needed
     db.exec(`
       CREATE TABLE IF NOT EXISTS users (
@@ -82,7 +82,7 @@ function main() {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS sessions (
         id TEXT PRIMARY KEY,
@@ -92,7 +92,7 @@ function main() {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `);
-    
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS roles (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -102,13 +102,13 @@ function main() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    
+
     try {
       db.exec(`ALTER TABLE users ADD COLUMN role_id INTEGER REFERENCES roles(id)`);
     } catch {
       // Column might already exist
     }
-    
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS projects (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -122,7 +122,7 @@ function main() {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS project_members (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -135,7 +135,7 @@ function main() {
         UNIQUE(project_id, user_id)
       )
     `);
-    
+
     // Seed default roles
     const adminRole = db.prepare('SELECT id FROM roles WHERE name = ?').get('Admin');
     if (!adminRole) {
@@ -145,7 +145,7 @@ function main() {
         JSON.stringify(['users.view', 'users.create', 'users.update', 'users.delete', 'roles.view', 'roles.create', 'roles.update', 'roles.delete', 'projects.view', 'projects.create', 'projects.update', 'projects.delete', 'projects.manage_members'])
       );
     }
-    
+
     const editorRole = db.prepare('SELECT id FROM roles WHERE name = ?').get('Editor');
     if (!editorRole) {
       db.prepare('INSERT INTO roles (name, description, permissions) VALUES (?, ?, ?)').run(
@@ -154,7 +154,7 @@ function main() {
         JSON.stringify(['projects.view', 'projects.create', 'projects.update'])
       );
     }
-    
+
     const viewerRole = db.prepare('SELECT id FROM roles WHERE name = ?').get('Viewer');
     if (!viewerRole) {
       db.prepare('INSERT INTO roles (name, description, permissions) VALUES (?, ?, ?)').run(
@@ -163,16 +163,16 @@ function main() {
         JSON.stringify(['projects.view'])
       );
     }
-    
+
     // Check if user exists
     const existingUser = db.prepare('SELECT id, name, email FROM users WHERE email = ?').get(email) as any;
-    
+
     if (existingUser) {
       console.log(`\n⚠️  User already exists: ${existingUser.name} (${existingUser.email})`);
-      
+
       // Get Admin role
       const adminRole = db.prepare('SELECT id, name FROM roles WHERE name = ?').get('Admin') as any;
-      
+
       if (adminRole) {
         db.prepare('UPDATE users SET role_id = ?, name = ? WHERE id = ?').run(adminRole.id, name, existingUser.id);
         console.log(`✅ User promoted to Admin role (role_id: ${adminRole.id})`);
@@ -180,31 +180,31 @@ function main() {
     } else {
       // Hash password
       const passwordHash = bcrypt.hashSync(password, 12);
-      
+
       // Create user
       const result = db.prepare('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)').run(
         name,
         email,
         passwordHash
       );
-      
+
       const userId = result.lastInsertRowid as number;
-      
+
       // Get Admin role
       const adminRole = db.prepare('SELECT id, name FROM roles WHERE name = ?').get('Admin') as any;
-      
+
       if (adminRole) {
         db.prepare('UPDATE users SET role_id = ? WHERE id = ?').run(adminRole.id, userId);
         console.log(`\n✅ Admin user created with ID: ${userId}, Role: ${adminRole.name}`);
       }
     }
-    
+
     db.close();
-    
+
     console.log('\n📝 Login with:');
     console.log(`   Email: ${email}`);
     console.log(`   Password: ${password}\n`);
-    
+
   } catch (error) {
     console.error('\n❌ Error:', error instanceof Error ? error.message : 'Unknown error');
     process.exit(1);

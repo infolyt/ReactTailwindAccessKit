@@ -43,7 +43,7 @@ npm run db:create-admin
 
 This creates an admin user with:
 - Email: admin@example.com
-- Password: admin123
+- Password: k3@MnpR1
 
 **Important**: Change the default admin credentials in production!
 
@@ -118,7 +118,7 @@ Tables are automatically created on first run:
 ### Login
 
 Navigate to http://localhost:3000/login and use:
-- Admin: admin@example.com / admin123
+- Admin: admin@example.com / k3@MnpR1
 
 ### Protected Routes
 
