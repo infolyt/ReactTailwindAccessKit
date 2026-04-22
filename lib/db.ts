@@ -4,7 +4,7 @@ import fs from 'fs';
 
 let dbInstance: Database.Database | null = null;
 
-function getDb(): Database.Database {
+function getLocalDb(): Database.Database {
   if (dbInstance) return dbInstance;
 
   const DB_DIR = path.join(process.cwd(), 'data');
@@ -15,87 +15,107 @@ function getDb(): Database.Database {
   }
 
   dbInstance = new Database(DB_PATH);
-
   dbInstance.pragma('journal_mode = WAL');
+
+  initializeTables(dbInstance);
+  seedRoles(dbInstance);
 
   return dbInstance;
 }
 
-const db = getDb();
+function initializeTables(db: Database.Database) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      role_id INTEGER REFERENCES roles(id),
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 
-// Create users table
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      expires_at DATETIME NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
 
-// Create sessions table for JWT invalidation (optional, but good practice)
-db.exec(`
-  CREATE TABLE IF NOT EXISTS sessions (
-    id TEXT PRIMARY KEY,
-    user_id INTEGER NOT NULL,
-    expires_at DATETIME NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  )
-`);
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS roles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE NOT NULL,
+      description TEXT,
+      permissions TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 
-// Create roles table for RBAC
-db.exec(`
-  CREATE TABLE IF NOT EXISTS roles (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    description TEXT,
-    permissions TEXT, -- JSON array of permissions
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS projects (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      description TEXT,
+      status TEXT DEFAULT 'pending',
+      progress INTEGER DEFAULT 0,
+      due_date DATETIME,
+      created_by INTEGER REFERENCES users(id),
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
 
-// Add role_id to users table if not exists
-try {
-  db.exec(`ALTER TABLE users ADD COLUMN role_id INTEGER REFERENCES roles(id)`);
-} catch (error) {
-  // Column might already exist, ignore
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS project_members (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id INTEGER NOT NULL,
+      user_id INTEGER NOT NULL,
+      role TEXT DEFAULT 'viewer',
+      added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      UNIQUE(project_id, user_id)
+    )
+  `);
 }
 
-// Create projects table
-db.exec(`
-  CREATE TABLE IF NOT EXISTS projects (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    description TEXT,
-    status TEXT DEFAULT 'pending',
-    progress INTEGER DEFAULT 0,
-    due_date DATETIME,
-    created_by INTEGER REFERENCES users(id),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
+function seedRoles(db: Database.Database) {
+  const adminRole = db.prepare('SELECT id FROM roles WHERE name = ?').get('Admin') as any;
+  if (!adminRole) {
+    db.prepare('INSERT INTO roles (name, description, permissions) VALUES (?, ?, ?)').run(
+      'Admin',
+      'Full system access',
+      JSON.stringify(['users.view', 'users.create', 'users.update', 'users.delete', 'roles.view', 'roles.create', 'roles.update', 'roles.delete', 'projects.view', 'projects.create', 'projects.update', 'projects.delete', 'projects.manage_members'])
+    );
+  }
 
-// Create project_members table for access control
-db.exec(`
-  CREATE TABLE IF NOT EXISTS project_members (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    project_id INTEGER NOT NULL,
-    user_id INTEGER NOT NULL,
-    role TEXT DEFAULT 'viewer', -- viewer, editor, admin
-    added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    UNIQUE(project_id, user_id)
-  )
-`);
+  const editorRole = db.prepare('SELECT id FROM roles WHERE name = ?').get('Editor') as any;
+  if (!editorRole) {
+    db.prepare('INSERT INTO roles (name, description, permissions) VALUES (?, ?, ?)').run(
+      'Editor',
+      'Can create and edit content',
+      JSON.stringify(['projects.view', 'projects.create', 'projects.update'])
+    );
+  }
 
-// Prepared statements for better performance
+  const viewerRole = db.prepare('SELECT id FROM roles WHERE name = ?').get('Viewer') as any;
+  if (!viewerRole) {
+    db.prepare('INSERT INTO roles (name, description, permissions) VALUES (?, ?, ?)').run(
+      'Viewer',
+      'Read-only access',
+      JSON.stringify(['projects.view'])
+    );
+  }
+}
+
+const db = getLocalDb();
+
 export const dbStatements = {
-  // User operations
   createUser: db.prepare(`
     INSERT INTO users (name, email, password_hash)
     VALUES (?, ?, ?)
@@ -121,7 +141,6 @@ export const dbStatements = {
     WHERE u.email = ?
   `),
 
-  // Session operations
   createSession: db.prepare(`
     INSERT INTO sessions (id, user_id, expires_at)
     VALUES (?, ?, ?)
@@ -137,12 +156,10 @@ export const dbStatements = {
     DELETE FROM sessions WHERE id = ?
   `),
 
-  // Clean up expired sessions
   cleanupExpiredSessions: db.prepare(`
     DELETE FROM sessions WHERE expires_at <= datetime('now')
   `),
 
-  // Role operations
   createRole: db.prepare(`
     INSERT INTO roles (name, description, permissions)
     VALUES (?, ?, ?)
@@ -176,7 +193,6 @@ export const dbStatements = {
     DELETE FROM roles WHERE id = ?
   `),
 
-  // User role operations
   updateUserRole: db.prepare(`
     UPDATE users
     SET role_id = ?
@@ -211,7 +227,6 @@ export const dbStatements = {
     WHERE id = ?
   `),
 
-  // Project operations
   createProject: db.prepare(`
     INSERT INTO projects (name, description, status, progress, due_date, created_by)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -239,7 +254,6 @@ export const dbStatements = {
     DELETE FROM projects WHERE id = ?
   `),
 
-  // Project member operations
   addProjectMember: db.prepare(`
     INSERT INTO project_members (project_id, user_id, role)
     VALUES (?, ?, ?)
@@ -274,37 +288,11 @@ export const dbStatements = {
     WHERE project_id = ? AND user_id = ?
   `),
 
-  // Check if user has access to project
   checkProjectAccess: db.prepare(`
     SELECT pm.role
     FROM project_members pm
     WHERE pm.project_id = ? AND pm.user_id = ?
   `),
 };
-
-// Seed default roles if they don't exist
-const adminRole = db.prepare(`SELECT id FROM roles WHERE name = 'Admin'`).get();
-if (!adminRole) {
-  dbStatements.createRole.run('Admin', 'Full system access', JSON.stringify([
-    'users.view', 'users.create', 'users.update', 'users.delete',
-    'roles.view', 'roles.create', 'roles.update', 'roles.delete',
-    'projects.view', 'projects.create', 'projects.update', 'projects.delete',
-    'projects.manage_members'
-  ]));
-}
-
-const editorRole = db.prepare(`SELECT id FROM roles WHERE name = 'Editor'`).get();
-if (!editorRole) {
-  dbStatements.createRole.run('Editor', 'Can create and edit content', JSON.stringify([
-    'projects.view', 'projects.create', 'projects.update'
-  ]));
-}
-
-const viewerRole = db.prepare(`SELECT id FROM roles WHERE name = 'Viewer'`).get();
-if (!viewerRole) {
-  dbStatements.createRole.run('Viewer', 'Read-only access', JSON.stringify([
-    'projects.view'
-  ]));
-}
 
 export default db;
