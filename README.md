@@ -1,20 +1,30 @@
-# ReactTailwindAccessKit
+# 🚀 ReactTailwindAccessKit
 
-A full-featured report/project management dashboard with Role-Based Access Control (RBAC), built on modern web technologies.
+<div align="center">
 
-## Features
+[![React](https://img.shields.io/badge/React-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)](https://react.dev/)
+[![TailwindCSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?style=for-the-badge&logo=shadcnui&logoColor=white)](https://ui.shadcn.com/)
+[![RBAC](https://img.shields.io/badge/RBAC-Working-brightgreen?style=for-the-badge)](https://en.wikipedia.org/wiki/Role-based_access_control)
+[![Status](https://img.shields.io/badge/Status-Working-success?style=for-the-badge)](https://github.com/infolyt/ReactTailwindAccessKit)
 
-- **Authentication System**
+</div>
+
+A full-featured report/project management dashboard with Role-Based Access Control (RBAC), built on modern web technologies. ✨
+
+## ✨ Features
+
+- **🔐 Authentication System**
   - JWT-based token authentication
   - User registration and login
   - Secure password hashing with bcrypt
 
-- **Role-Based Access Control (RBAC)**
+- **🛡️ Role-Based Access Control (RBAC)**
   - Three default roles: Admin, Editor, Viewer
   - Permission-based access management
   - Role assignment to users
 
-- **Dashboard Modules**
+- **📊 Dashboard Modules**
   - Analytics - Overview with charts and statistics
   - Reports - Report management and tracking
   - Projects - Project management with progress tracking
@@ -24,18 +34,18 @@ A full-featured report/project management dashboard with Role-Based Access Contr
   - Messages - Internal messaging system
   - Settings - Application configuration
 
-- **Theme System**
+- **🎨 Theme System**
   - 6 Color Themes: Slate, Blue, Emerald, Rose, Amber, Purple
   - Dark/Light mode support
   - System preference detection
   - Persistent theme preferences
 
-- **Modern UI Components**
+- **📱 Modern UI Components**
   - shadcn/ui-style components
   - Responsive design
   - Accessible components (Radix UI)
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 | Technology | Version |
 |------------|---------|
@@ -46,14 +56,14 @@ A full-featured report/project management dashboard with Role-Based Access Contr
 | SQLite | (better-sqlite3) |
 | Vitest | 2.x |
 
-## Quick Start
+## ⏱️ Quick Start
 
-### Prerequisites
+### 📋 Prerequisites
 
 - Node.js 18+
 - npm or pnpm
 
-### Installation
+### 🛠️ Installation
 
 ```bash
 # Clone the repository
@@ -72,12 +82,12 @@ npm run db:create-admin
 npm run dev
 ```
 
-### Access the Application
+### 🔗 Access the Application
 
 - **Local**: http://localhost:3000
 - **Login**: Use credentials created with `db:create-admin`
 
-## Project Structure
+## 📂 Project Structure
 
 ```
 ReactTailwindAccessKit/
@@ -114,7 +124,7 @@ ReactTailwindAccessKit/
 └── tsconfig.json        # TypeScript config
 ```
 
-## Available Scripts
+## 📜 Available Scripts
 
 | Command | Description |
 |---------|-------------|
@@ -126,9 +136,9 @@ ReactTailwindAccessKit/
 | `npm run test:ui` | Run tests with UI |
 | `npm run db:create-admin` | Create admin user |
 
-## Database Schema
+## 🗄️ Database Schema
 
-### Tables
+### 📊 Tables
 
 - **users** - User accounts
 - **sessions** - JWT session tokens
@@ -136,7 +146,7 @@ ReactTailwindAccessKit/
 - **projects** - Project data
 - **project_members** - Project access control
 
-### Default Roles
+### 👤 Default Roles
 
 | Role | Permissions |
 |------|------------|
@@ -144,9 +154,9 @@ ReactTailwindAccessKit/
 | Editor | Create/edit projects |
 | Viewer | View only |
 
-## Theme Customization
+## 🎨 Theme Customization
 
-### Supported Themes
+### 🌈 Supported Themes
 
 - Slate (default)
 - Blue
@@ -155,28 +165,28 @@ ReactTailwindAccessKit/
 - Amber
 - Purple
 
-### Adding Custom Themes
+### 🔧 Adding Custom Themes
 
 1. Add colors to `tailwind.config.js`
 2. Add theme entry to `lib/themes.ts`
 
-## Docker Deployment
+## 🐳 Docker Deployment
 
-### Development
+### 👨‍💻 Development
 
 ```bash
 docker-compose up --build
 ```
 
-### Production
+### 🚀 Production
 
 ```bash
 docker-compose -f docker-compose.yml up -f docker-compose.prod.yml up --build
 ```
 
-## API Endpoints
+## 🔌 API Endpoints
 
-### Authentication
+### 🔑 Authentication
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -184,7 +194,7 @@ docker-compose -f docker-compose.yml up -f docker-compose.prod.yml up --build
 | POST | `/api/auth/login` | Login user |
 | POST | `/api/auth/logout` | Logout user |
 
-### Users
+### 👤 Users
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -194,7 +204,7 @@ docker-compose -f docker-compose.yml up -f docker-compose.prod.yml up --build
 | PUT | `/api/users/[id]` | Update user |
 | DELETE | `/api/users/[id]` | Delete user |
 
-### Roles
+### 🛡️ Roles
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -203,14 +213,14 @@ docker-compose -f docker-compose.yml up -f docker-compose.prod.yml up --build
 | PUT | `/api/roles/[id]` | Update role |
 | DELETE | `/api/roles/[id]` | Delete role |
 
-## Environment Variables
+## ⚙️ Environment Variables
 
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `JWT_SECRET` | Secret key for JWT signing | Yes |
 | `NODE_ENV` | Environment (development/production) | No |
 
-## Testing
+## 🧪 Testing
 
 ```bash
 # Run all tests
@@ -223,21 +233,41 @@ npm test -- --watch
 npm test -- --coverage
 ```
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines.
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
+## 💬 Support
 
 For issues and feature requests, please open an issue on GitHub.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 - [shadcn/ui](https://ui.shadcn.com/) - UI component inspiration
 - [Radix UI](https://www.radix-ui.com/) - Accessible primitives
 - [Tailwind CSS](https://tailwindcss.com/) - Styling framework
 - [Next.js](https://nextjs.org/) - React framework
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+
+### Login Page
+![Login Light](./screenshot/loginlight.png)
+
+### Dashboard - Light Theme
+![Dashboard Light](./screenshot/dahboardlight.png)
+
+### Dashboard - Light Red Theme
+![Dashboard Light Red](./screenshot/dashboardlightred.png)
+
+### Dashboard - Dark Red Theme
+![Dashboard Dark Red](./screenshot/dashboarddarkred.png)
+
+</div>
