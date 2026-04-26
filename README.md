@@ -8,6 +8,17 @@
 [![RBAC](https://img.shields.io/badge/RBAC-Working-brightgreen?style=for-the-badge)](https://en.wikipedia.org/wiki/Role-based_access_control)
 [![Status](https://img.shields.io/badge/Status-Working-success?style=for-the-badge)](https://github.com/infolyt/ReactTailwindAccessKit)
 
+## 🔗 Live Demo
+
+**[https://reacttailwindaccesskit.infolyt.org/dashboard](https://reacttailwindaccesskit.infolyt.org/dashboard)**
+
+```
+Email: admin@example.com
+Password: k3@MnpR1
+```
+
+---
+
 </div>
 
 A full-featured report/project management dashboard with Role-Based Access Control (RBAC), built on modern web technologies. ✨
@@ -84,7 +95,6 @@ npm run dev
 
 ### 🔗 Access the Application
 
-- **Demo**: https://reacttailwindaccesskit.infolyt.org/dashboard
 - **Local**: http://localhost:3000
 - **Login**: Use credentials created with `db:create-admin`
 
