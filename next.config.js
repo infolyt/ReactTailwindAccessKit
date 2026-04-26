@@ -5,4 +5,7 @@ const nextConfig = {
 
 module.exports = nextConfig;
 
-import('@opennextjs/cloudflare').then(m => m.initOpenNextCloudflareForDev());
+// Initialize Cloudflare for dev (optional - requires Wrangler login)
+if (process.env.NODE_ENV !== 'production' && !process.env.SKIP_CLOUDFLARE) {
+  import('@opennextjs/cloudflare').then(m => m.initOpenNextCloudflareForDev()).catch(() => {});
+}
