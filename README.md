@@ -13,7 +13,7 @@
 **[https://reacttailwindaccesskit.infolyt.org/dashboard](https://reacttailwindaccesskit.infolyt.org/dashboard)**
 
 ```
-Email: admin@example.com
+  Email: admin@example.com
 Password: k3@MnpR1
 ```
 
