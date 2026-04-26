@@ -20,8 +20,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: 'admin@example.com',
+    password: 'k3@MnpR1',
     remember: false,
   });
 
@@ -106,7 +106,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="name@company.com"
+                placeholder="admin@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
@@ -119,7 +119,7 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  placeholder="k3@MnpR1"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required

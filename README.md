@@ -84,6 +84,7 @@ npm run dev
 
 ### 🔗 Access the Application
 
+- **Demo**: https://reacttailwindaccesskit.infolyt.org/dashboard
 - **Local**: http://localhost:3000
 - **Login**: Use credentials created with `db:create-admin`
 
